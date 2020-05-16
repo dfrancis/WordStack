@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private Random random = new Random();
     private StackedLayout stackedLayout;
     private String word1, word2;
+    private Stack<LetterTile> placedTiles = new Stack<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +57,10 @@ public class MainActivity extends AppCompatActivity {
             String line = null;
             while((line = in.readLine()) != null) {
                 String word = line.trim();
-                /**
-                 **
-                 **  YOUR CODE GOES HERE
-                 **
-                 **/
+
+                if (word.length() == WORD_LENGTH) {
+                    words.add(word);
+                }
             }
         } catch (IOException e) {
             Toast toast = Toast.makeText(this, "Could not load dictionary", Toast.LENGTH_LONG);
@@ -89,11 +89,8 @@ public class MainActivity extends AppCompatActivity {
                     TextView messageBox = (TextView) findViewById(R.id.message_box);
                     messageBox.setText(word1 + " " + word2);
                 }
-                /**
-                 **
-                 **  YOUR CODE GOES HERE
-                 **
-                 **/
+
+                placedTiles.push(tile);
                 return true;
             }
             return false;
@@ -141,22 +138,52 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean onStartGame(View view) {
+        ViewGroup word1LinearLayout = findViewById(R.id.word1);
+        ViewGroup word2LinearLayout = findViewById(R.id.word2);
+        word1LinearLayout.removeAllViews();
+        word2LinearLayout.removeAllViews();
+
         TextView messageBox = (TextView) findViewById(R.id.message_box);
         messageBox.setText("Game started");
-        /**
-         **
-         **  YOUR CODE GOES HERE
-         **
-         **/
+
+        Random rand = new Random();
+        word1 = words.get(rand.nextInt(words.size()));
+        word2 = words.get(rand.nextInt(words.size()));
+        String scrambledWord = new String();
+        int word1Idx = 0;
+        int word2Idx = 0;
+        for (int totalCount = 0; totalCount < word1.length() + word2.length(); ++totalCount) {
+            char nextChar;
+            if (word1Idx == word1.length()) {
+                nextChar = word2.charAt(word2Idx++);
+            }
+            else if (word2Idx == word2.length()) {
+                nextChar = word1.charAt(word1Idx++);
+            }
+            else {
+                if (rand.nextInt(2) == 1) {
+                    nextChar = word1.charAt(word1Idx++);
+                }
+                else {
+                    nextChar = word2.charAt(word2Idx++);
+                }
+            }
+            scrambledWord += nextChar;
+        }
+        messageBox.append(" " + scrambledWord);
+        for (int tileIdx = 0; tileIdx < scrambledWord.length(); ++tileIdx) {
+            LetterTile tile = new LetterTile(this, scrambledWord.charAt(scrambledWord.length() - 1 - tileIdx));
+            stackedLayout.push(tile);
+        }
+
         return true;
     }
 
     public boolean onUndo(View view) {
-        /**
-         **
-         **  YOUR CODE GOES HERE
-         **
-         **/
+        if (! placedTiles.empty()) {
+            LetterTile tile = placedTiles.pop();
+            tile.moveToViewGroup((ViewGroup) stackedLayout);
+        }
         return true;
     }
 }

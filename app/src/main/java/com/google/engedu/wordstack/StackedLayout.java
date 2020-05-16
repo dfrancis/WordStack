@@ -30,20 +30,25 @@ public class StackedLayout extends LinearLayout {
     }
 
     public void push(View tile) {
-        /**
-         **
-         **  YOUR CODE GOES HERE
-         **
-         **/
+        if (! tiles.empty()) {
+            View topTileView = tiles.peek();
+            removeView(topTileView);
+        }
+        tiles.push(tile);
+        addView(tile);
     }
 
     public View pop() {
         View popped = null;
-        /**
-         **
-         **  YOUR CODE GOES HERE
-         **
-         **/
+
+        if (! tiles.empty()) {
+            popped = tiles.pop();
+            removeView(popped);
+            if (! tiles.empty()) {
+                View topTileView = tiles.peek();
+                addView(topTileView);
+            }
+        }
         return popped;
     }
 
